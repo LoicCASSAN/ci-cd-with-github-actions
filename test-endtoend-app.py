@@ -2,7 +2,8 @@ import unittest
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
-import time  # module pour voir les étapes de test
+from selenium.webdriver.chrome.options import Options  # Importation correcte
+import time
 
 class TestAppE2E(unittest.TestCase):
     def setUp(self):
