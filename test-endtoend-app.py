@@ -6,7 +6,15 @@ import time  # module pour voir les étapes de test
 
 class TestAppE2E(unittest.TestCase):
     def setUp(self):
-        self.driver = webdriver.Chrome('')
+        # Configuration pour utiliser selenium/standalone-chrome
+        chrome_options = Options()
+        chrome_options.add_argument("--headless")  # Exécution en mode sans tête
+        chrome_options.add_argument("--no-sandbox")
+        chrome_options.add_argument("--disable-dev-shm-usage")
+        self.driver = webdriver.Remote(
+            command_executor='http://localhost:4444/wd/hub',
+            options=chrome_options
+        )
         self.driver.get('http://localhost:5000')
 
     def test_add_update_and_delete_item(self):
