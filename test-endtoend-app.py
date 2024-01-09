@@ -2,7 +2,8 @@ import unittest
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.options import Options  # Importation correcte
+from selenium.webdriver.chrome.options import Options
+import os
 import time
 
 class TestAppE2E(unittest.TestCase):
@@ -12,11 +13,15 @@ class TestAppE2E(unittest.TestCase):
         chrome_options.add_argument("--headless")  # Exécution en mode sans tête
         chrome_options.add_argument("--no-sandbox")
         chrome_options.add_argument("--disable-dev-shm-usage")
+
+        selenium_driver_url = os.environ.get("SELENIUM_DRIVER_URL", "http://localhost:4444/wd/hub")
+        app_url = os.environ.get("APP_URL", "http://localhost:5000")
+
         self.driver = webdriver.Remote(
-            command_executor='http://localhost:4444/wd/hub',
+            command_executor=selenium_driver_url,
             options=chrome_options
         )
-        self.driver.get('http://localhost:5000')
+        self.driver.get(app_url)
 
     def test_add_update_and_delete_item(self):
         # Ajout d'un item
