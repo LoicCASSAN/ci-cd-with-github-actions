@@ -3,14 +3,14 @@ from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 import os
-import time
 
 class TestAppE2E(unittest.TestCase):
     def setUp(self):
-        # Configuration pour utiliser selenium/standalone-chrome
         chrome_options = Options()
-        chrome_options.add_argument("--headless")  # Exécution en mode sans tête
+        chrome_options.add_argument("--headless")
         chrome_options.add_argument("--no-sandbox")
         chrome_options.add_argument("--disable-dev-shm-usage")
 
