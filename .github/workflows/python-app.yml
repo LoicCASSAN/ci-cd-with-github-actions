@@ -24,6 +24,9 @@ jobs:
         with:
           python-version: "3.9"
 
+      - name: Install dependencies
+        run: sudo apt-get install -y jq
+  
       - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
@@ -53,13 +56,11 @@ jobs:
             sleep 5
           done
 
-
-
-          - name: Run integration tests with Selenium
-          run: python test-endtoend-app.py
-          env:
-            SELENIUM_DRIVER_URL: http://localhost:4444/wd/hub
-            APP_URL: http://localhost:5000
+      - name: Run integration tests with Selenium
+        run: python test-endtoend-app.py
+        env:
+          SELENIUM_DRIVER_URL: http://localhost:4444/wd/hub
+          APP_URL: http://localhost:5000
   
       - name: Remove Docker container for integration tests
         run: docker rm -f flask-integration-tests
