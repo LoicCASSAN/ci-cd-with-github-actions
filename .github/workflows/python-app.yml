@@ -32,11 +32,19 @@ jobs:
       - name: Build Docker image
         run: docker build -t my-flask-app .
 
-      - name: Run Docker container
-        run: docker run -d --name flask-app -p 5000:5000 my-flask-app
+      # Test unitaires dans un conteneur distinct
+      - name: Run Docker container for unit tests
+        run: docker run -d --name flask-unit-tests my-flask-app
 
       - name: Run unit tests in Docker container
-        run: docker exec flask-app python -m unittest
+        run: docker exec flask-unit-tests python -m unittest test-app.py
+
+      - name: Remove Docker container for unit tests
+        run: docker rm -f flask-unit-tests
+
+      # Tests d'intégration dans un autre conteneur
+      - name: Run Docker container for integration tests
+        run: docker run -d --name flask-integration-tests -p 5000:5000 my-flask-app
 
       - name: Wait for Selenium service to be ready
         run: |
@@ -46,21 +54,26 @@ jobs:
             sleep 5
           done
 
-      - name: Run integration tests with Selenium
-        run: python test-endtoend-app.py
-        env:
-          SELENIUM_DRIVER_URL: http://localhost:4444/wd/hub
-          APP_URL: http://localhost:5000
-
+          - name: Run integration tests with Selenium
+          run: python test-endtoend-app.py
+          env:
+            SELENIUM_DRIVER_URL: http://localhost:4444/wd/hub
+            APP_URL: http://localhost:5000
+  
+      - name: Remove Docker container for integration tests
+        run: docker rm -f flask-integration-tests
+  
+      # Étape de déploiement (exemple avec DockerHub)
       - name: Log in to DockerHub
         uses: docker/login-action@v1
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
-
+  
       - name: Push Docker image to DockerHub
         run: docker push my-flask-app
-
-      - name: Remove Docker container
-        if: always()
-        run: docker rm -f flask-app
+  
+      # Nettoyage final
+      - name: Remove Docker image
+        run: docker rmi my-flask-app
+  
