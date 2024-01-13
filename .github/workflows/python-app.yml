@@ -48,11 +48,12 @@ jobs:
 
       - name: Wait for Selenium service to be ready
         run: |
-          while ! curl -sSL "http://localhost:4444/wd/hub/status" \
-              | jq -r '.value.ready' | grep 'true' > /dev/null; do
+          until curl -sSL "http://localhost:4444/wd/hub/status" | jq -r '.value.ready' | grep 'true' > /dev/null; do
             echo 'Waiting for the Selenium service...'
             sleep 5
           done
+
+
 
           - name: Run integration tests with Selenium
           run: python test-endtoend-app.py
