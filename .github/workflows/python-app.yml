@@ -38,9 +38,6 @@ jobs:
     - name: Run unit tests in Docker container
       run: docker exec flask-app python -m unittest discover
 
-    - name: Run Flask application in Docker container
-      run: docker exec flask-app flask run
-
     - name: Run integration tests with Selenium
       run: python test-endtoend-app.py
 
