@@ -36,10 +36,13 @@ jobs:
       run: docker run -d --name flask-app -p 5000:5000 my-flask-app
 
     - name: Run unit tests in Docker container
-      run: docker exec flask-app python -m unittest discover
+      run: docker exec flask-app python -m unittest
 
     - name: Run integration tests with Selenium
       run: python test-endtoend-app.py
+      env:
+        SELENIUM_DRIVER_URL: http://localhost:4444/wd/hub
+        APP_URL: http://localhost:5000
 
     - name: Log in to DockerHub
       uses: docker/login-action@v1
