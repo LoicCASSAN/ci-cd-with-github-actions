@@ -17,50 +17,50 @@ jobs:
           - 4444:4444
 
     steps:
-    - uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-    - name: Set up Python
-      uses: actions/setup-python@v3
-      with:
-        python-version: "3.9"
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.9"
 
-    - name: Install Python dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
 
-    - name: Build Docker image
-      run: docker build -t my-flask-app .
+      - name: Build Docker image
+        run: docker build -t my-flask-app .
 
-    - name: Run Docker container
-      run: docker run -d --name flask-app -p 5000:5000 my-flask-app
+      - name: Run Docker container
+        run: docker run -d --name flask-app -p 5000:5000 my-flask-app
 
-    - name: Run unit tests in Docker container
-      run: docker exec flask-app python -m unittest
+      - name: Run unit tests in Docker container
+        run: docker exec flask-app python -m unittest
 
-    - name: Wait for Selenium service to be ready
-      run: |
-        while ! curl -sSL "http://localhost:4444/wd/hub/status" 2>&1 \
-            | jq -r '.value.ready' 2>&1 | grep 'true' > /dev/null; do
-          echo 'Waiting for the Selenium service...'
-          sleep 5
-        done
+      - name: Wait for Selenium service to be ready
+        run: |
+          while ! curl -sSL "http://localhost:4444/wd/hub/status" \
+              | jq -r '.value.ready' | grep 'true' > /dev/null; do
+            echo 'Waiting for the Selenium service...'
+            sleep 5
+          done
 
-    - name: Run integration tests with Selenium
-      run: python test-endtoend-app.py
-      env:
-        SELENIUM_DRIVER_URL: http://localhost:4444/wd/hub
-        APP_URL: http://localhost:5000
+      - name: Run integration tests with Selenium
+        run: python test-endtoend-app.py
+        env:
+          SELENIUM_DRIVER_URL: http://localhost:4444/wd/hub
+          APP_URL: http://localhost:5000
 
-    - name: Log in to DockerHub
-      uses: docker/login-action@v1
-      with:
-        username: ${{ secrets.DOCKERHUB_USERNAME }}
-        password: ${{ secrets.DOCKERHUB_PASSWORD }}
+      - name: Log in to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
-    - name: Push Docker image to DockerHub
-      run: docker push my-flask-app
+      - name: Push Docker image to DockerHub
+        run: docker push my-flask-app
 
-    - name: Remove Docker container
-      if: always()
-      run: docker rm -f flask-app
+      - name: Remove Docker container
+        if: always()
+        run: docker rm -f flask-app
