@@ -38,7 +38,6 @@ def create_app():
     return app
 
 # Test d'intégration avec Selenium
-# Test d'intégration avec Selenium
 class TestAppE2E(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -49,14 +48,11 @@ class TestAppE2E(unittest.TestCase):
         cls.server_thread.start()
         time.sleep(1)  # Attendre que l'application démarre
 
-        # Configuration de Selenium WebDriver pour utiliser le service Selenium distant
-        cls.driver = webdriver.Remote(
-            command_executor='http://host.docker.internal:4444/wd/hub', 
-            desired_capabilities=webdriver.DesiredCapabilities.CHROME
-        )
+        # Configuration de Selenium WebDriver pour utiliser le service Selenium local
+        cls.driver = webdriver.Chrome()
 
     def test_add_update_and_delete_item(self):
-        self.driver.get('http://host.docker.internal:5000')  # Assurez-vous que cette URL est accessible depuis votre conteneur
+        self.driver.get('http://localhost:5000')  # Assurez-vous que cette URL est accessible depuis votre machine locale
 
 
         # Ajout d'un item
@@ -100,5 +96,4 @@ class TestAppE2E(unittest.TestCase):
 
 # Exécution des tests si exécuté en tant que script principal
 if __name__ == '__main__':
-    app = create_app()
-    app.run(host='0.0.0.0', port=5000)
+    unittest.main()
