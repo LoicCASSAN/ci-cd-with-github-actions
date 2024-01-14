@@ -44,7 +44,7 @@ class TestAppE2E(unittest.TestCase):
     def setUpClass(cls):
         # Démarrage de l'application Flask dans un thread séparé
         cls.app = create_app()
-        cls.app_thread = threading.Thread(target=lambda: cls.app.run(debug=True, use_reloader=False))
+        cls.app_thread = threading.Thread(target=lambda: cls.app.run(debug=True, use_reloader=False, host='0.0.0.0'))
         cls.app_thread.start()
         time.sleep(1)  # Attendre que l'application démarre
 
