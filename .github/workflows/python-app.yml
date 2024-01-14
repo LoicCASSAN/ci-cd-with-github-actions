@@ -10,12 +10,6 @@ jobs:
   build-and-test:
     runs-on: ubuntu-latest
 
-    services:
-      selenium:
-        image: selenium/standalone-chrome:latest
-        ports:
-          - 4444:4444
-
     steps:
       - uses: actions/checkout@v3
 
@@ -33,21 +27,13 @@ jobs:
           pip install -r requirements.txt
 
       - name: Build Docker image
-        run: docker build -t my-flask-app .
+        run: docker build -t my-flask-app:${{ github.sha }} .
 
-      # Test unitaires dans un conteneur distinct
       - name: Run Docker container for unit tests
-        run: docker run -d --name flask-unit-tests my-flask-app
+        run: docker run --name flask-unit-tests my-flask-app:${{ github.sha }} python -m unittest test-app.py
 
-      - name: Run unit tests in Docker container
-        run: docker exec flask-unit-tests python -m unittest test-app.py
-
-      - name: Remove Docker container for unit tests
-        run: docker rm -f flask-unit-tests
-
-      # Tests d'intégration dans un autre conteneur
-      - name: Run Docker container for integration tests
-        run: docker run -d --name flask-integration-tests -p 5000:5000 my-flask-app
+      - name: Start Selenium Service
+        run: docker run -d --name selenium-standalone -p 4444:4444 selenium/standalone-chrome:latest
 
       - name: Wait for Selenium service to be ready
         run: |
@@ -57,25 +43,27 @@ jobs:
           done
 
       - name: Run integration tests with Selenium
-        run: python test-endtoend-app.py
+        run: timeout 5m python test-endtoend-app.py
         env:
           SELENIUM_DRIVER_URL: http://localhost:4444/wd/hub
           APP_URL: http://localhost:5000
-  
-      - name: Remove Docker container for integration tests
-        run: docker rm -f flask-integration-tests
-  
-      # Étape de déploiement (exemple avec DockerHub)
+
       - name: Log in to DockerHub
+        if: success()
         uses: docker/login-action@v1
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
-  
+
       - name: Push Docker image to DockerHub
-        run: docker push my-flask-app
-  
-      # Nettoyage final
+        if: success()
+        run: docker push my-flask-app:${{ github.sha }}
+
+      - name: Cleanup
+        run: |
+          docker rm -f flask-unit-tests
+          docker rm -f selenium-standalone
+      
       - name: Remove Docker image
-        run: docker rmi my-flask-app
-  
+        run: docker rmi my-flask-app:${{ github.sha }}
+    
