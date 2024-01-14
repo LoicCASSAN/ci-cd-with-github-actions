@@ -1,4 +1,5 @@
 from flask import Flask, request, render_template, redirect, url_for
+from werkzeug.serving import make_server
 import unittest
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
@@ -42,8 +43,9 @@ class TestAppE2E(unittest.TestCase):
     def setUpClass(cls):
         # Démarrage de l'application Flask dans un thread séparé
         cls.app = create_app()
-        cls.app_thread = threading.Thread(target=lambda: cls.app.run(debug=True, use_reloader=False))
-        cls.app_thread.start()
+        cls.server = make_server('localhost', 5000, cls.app)
+        cls.server_thread = threading.Thread(target=cls.server.serve_forever)
+        cls.server_thread.start()
         time.sleep(1)  # Attendre que l'application démarre
 
         # Configuration de Selenium WebDriver
@@ -87,7 +89,8 @@ class TestAppE2E(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         cls.driver.close()
-        cls.app_thread.join()
+        cls.server.shutdown()
+        cls.server_thread.join()
 
 # Exécution des tests si exécuté en tant que script principal
 if __name__ == '__main__':
