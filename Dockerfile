@@ -5,14 +5,14 @@ RUN apt-get update && \
     apt-get install -y wget gnupg2 curl unzip
 
 # Installer Google Chrome
+ARG GOOGLE_CHROME_VERSION="76.0.3809.68"  # Remplacer par la version actuelle de Chrome
 RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - && \
     echo 'deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main' > /etc/apt/sources.list.d/google-chrome.list && \
-    apt-get update && apt-get install -y google-chrome-stable
+    apt-get update && apt-get install -y google-chrome-stable=$GOOGLE_CHROME_VERSION
 
 # Installer Chromedriver
-RUN CHROME_VERSION=$(google-chrome --version | sed 's/Google Chrome //') && \
-    CHROMEDRIVER_VERSION=$(curl -s "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$CHROME_VERSION") && \
-    wget -O /tmp/chromedriver.zip "https://chromedriver.storage.googleapis.com/$CHROMEDRIVER_VERSION/chromedriver_linux64.zip" && \
+ARG CHROMEDRIVER_VERSION="76.0.3809.68"  # Remplacer par la version correspondante de Chromedriver
+RUN wget -O /tmp/chromedriver.zip "https://chromedriver.storage.googleapis.com/$CHROMEDRIVER_VERSION/chromedriver_linux64.zip" && \
     unzip /tmp/chromedriver.zip chromedriver -d /usr/local/bin/ && \
     rm /tmp/chromedriver.zip
 
