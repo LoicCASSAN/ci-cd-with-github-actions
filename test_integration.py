@@ -1,62 +1,31 @@
-from flask import Flask, request, render_template, redirect, url_for
 import unittest
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 import time
-import threading
 
-# Application Flask
-def create_app():
-    app = Flask(__name__)
-    items = []
-
-    @app.route('/')
-    def index():
-        return render_template('index.html', items=items)
-
-    @app.route('/add', methods=['POST'])
-    def add_item():
-        item = request.form.get('item')
-        if item:
-            items.append(item)
-        return redirect(url_for('index'))
-
-    @app.route('/delete/<int:index>')
-    def delete_item(index):
-        if index < len(items):
-            items.pop(index)
-        return redirect(url_for('index'))
-
-    @app.route('/update/<int:index>', methods=['POST'])
-    def update_item(index):
-        if index < len(items):
-            items[index] = request.form.get('new_item')
-        return redirect(url_for('index'))
-
-    return app
-
-# Test d'intégration avec Selenium
 class TestAppE2E(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        # Démarrage de l'application Flask dans un thread séparé
-        cls.app = create_app()
-        cls.app_thread = threading.Thread(target=lambda: cls.app.run(debug=True, use_reloader=False))
-        cls.app_thread.start()
-        time.sleep(1)  # Attendre que l'application démarre
+    def setUp(self):
+        # Configuration de Selenium WebDriver pour utiliser le service Selenium distant
+        options = webdriver.ChromeOptions()
+        options.add_argument('--headless')
+        options.add_argument('--no-sandbox')
+        options.add_argument('--disable-dev-shm-usage')
+        options.add_argument('--disable-gpu')
+        options.add_argument('--remote-debugging-port=9222')
 
-        # Configuration de Selenium WebDriver
-        cls.driver = webdriver.Chrome('')  # Spécifiez le chemin si nécessaire
-        cls.driver.get('http://localhost:5000')
+        self.driver = webdriver.Remote(
+            command_executor='http://chrome:4444/wd/hub',
+            options=options
+        )
+        self.driver.get("http://web:5000/")
 
     def test_add_update_and_delete_item(self):
         # Ajout d'un item
         input_field = self.driver.find_element(By.NAME, 'item')
         input_field.send_keys('Item : Voiture')
-        time.sleep(2)
         input_field.send_keys(Keys.RETURN)
-        time.sleep(2)
+        time.sleep(2)  # Attendre 2 secondes pour le traitement
 
         # Vérification de l'ajout de l'item
         self.assertIn('Item : Voiture', self.driver.page_source)
@@ -81,14 +50,14 @@ class TestAppE2E(unittest.TestCase):
             delete_buttons[0].click()
             time.sleep(2)
 
-            # Vérification de la suppression
-            self.assertNotIn('Item : Voiture Updated', self.driver.page_source)
+        # Vérification de la suppression
+        self.assertNotIn('Item : Voiture Updated', self.driver.page_source)
 
-    @classmethod
-    def tearDownClass(cls):
-        cls.driver.close()
-        cls.app_thread.join()
+    def tearDown(self):
+        self.driver.quit()
 
-# Exécution des tests si exécuté en tant que script principal
 if __name__ == '__main__':
     unittest.main()
+
+
+
