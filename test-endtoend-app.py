@@ -7,7 +7,7 @@ from selenium.webdriver.common.by import By
 import time
 import threading
 
-# Application Flask2
+# Application Flask
 def create_app():
     app = Flask(__name__)
     items = []
@@ -43,16 +43,20 @@ class TestAppE2E(unittest.TestCase):
     def setUpClass(cls):
         # Démarrage de l'application Flask dans un thread séparé
         cls.app = create_app()
-        cls.server = make_server('localhost', 5000, cls.app)
+        cls.server = make_server('0.0.0.0', 5000, cls.app)  # Écoute sur toutes les interfaces
         cls.server_thread = threading.Thread(target=cls.server.serve_forever)
         cls.server_thread.start()
         time.sleep(1)  # Attendre que l'application démarre
 
-        # Configuration de Selenium WebDriver
-        cls.driver = webdriver.Chrome('')  # Spécifiez le chemin si nécessaire
-        cls.driver.get('http://localhost:5000')
+        # Configuration de Selenium WebDriver pour utiliser le service Selenium distant
+        cls.driver = webdriver.Remote(
+            command_executor='http://localhost:4444/wd/hub', 
+            desired_capabilities=webdriver.DesiredCapabilities.CHROME
+        )
 
     def test_add_update_and_delete_item(self):
+        self.driver.get('http://localhost:5000')  # Assurez-vous que cette URL est accessible depuis votre conteneur
+
         # Ajout d'un item
         input_field = self.driver.find_element(By.NAME, 'item')
         input_field.send_keys('Item : Voiture')
@@ -88,7 +92,7 @@ class TestAppE2E(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        cls.driver.close()
+        cls.driver.quit()
         cls.server.shutdown()
         cls.server_thread.join()
 
