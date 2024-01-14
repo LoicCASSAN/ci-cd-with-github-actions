@@ -10,6 +10,12 @@ jobs:
   build-and-test:
     runs-on: ubuntu-latest
 
+    services:
+      selenium:
+        image: selenium/standalone-chrome:latest
+        ports:
+          - 4444:4444
+
     steps:
       - uses: actions/checkout@v3
 
@@ -37,3 +43,8 @@ jobs:
 
       - name: Run integration tests
         run: docker run --network host my-flask-app
+
+      - name: Cleanup
+        run: |
+          docker rm -f selenium-standalone
+          docker rmi my-flask-app
