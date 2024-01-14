@@ -3,6 +3,8 @@ import unittest
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
+from selenium.webdriver.chrome.options import Options
 import time
 import threading
 
@@ -46,8 +48,17 @@ class TestAppE2E(unittest.TestCase):
         cls.app_thread.start()
         time.sleep(1)  # Attendre que l'application démarre
 
-        # Configuration de Selenium WebDriver
-        cls.driver = webdriver.Chrome('')  # Spécifiez le chemin si nécessaire
+        # Configuration de Selenium WebDriver pour utiliser le conteneur Selenium
+        options = Options()
+        options.add_argument('--no-sandbox')
+        options.add_argument('--disable-dev-shm-usage')
+        options.add_argument('--headless')
+
+        cls.driver = webdriver.Remote(
+            command_executor='http://localhost:4444/wd/hub',
+            desired_capabilities=DesiredCapabilities.CHROME,
+            options=options
+        )
         cls.driver.get('http://localhost:5000')
 
     def test_add_update_and_delete_item(self):
