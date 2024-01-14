@@ -7,7 +7,7 @@ from selenium.webdriver.common.by import By
 import time
 import threading
 
-# Application Flask
+# Application Flask2
 def create_app():
     app = Flask(__name__)
     items = []
