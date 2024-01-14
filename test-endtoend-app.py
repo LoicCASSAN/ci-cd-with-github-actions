@@ -38,6 +38,7 @@ def create_app():
     return app
 
 # Test d'intégration avec Selenium
+# Test d'intégration avec Selenium
 class TestAppE2E(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -50,12 +51,13 @@ class TestAppE2E(unittest.TestCase):
 
         # Configuration de Selenium WebDriver pour utiliser le service Selenium distant
         cls.driver = webdriver.Remote(
-            command_executor='http://localhost:4444/wd/hub', 
+            command_executor='http://host.docker.internal:4444/wd/hub', 
             desired_capabilities=webdriver.DesiredCapabilities.CHROME
         )
 
     def test_add_update_and_delete_item(self):
-        self.driver.get('http://localhost:5000')  # Assurez-vous que cette URL est accessible depuis votre conteneur
+        self.driver.get('http://host.docker.internal:5000')  # Assurez-vous que cette URL est accessible depuis votre conteneur
+
 
         # Ajout d'un item
         input_field = self.driver.find_element(By.NAME, 'item')
