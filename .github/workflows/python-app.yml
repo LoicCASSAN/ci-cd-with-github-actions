@@ -30,7 +30,7 @@ jobs:
           pip install -r requirements.txt
 
       - name: Run unit tests
-        run: python -m unittest test_app.py
+        run: python -m unittest test-app.py
 
       - name: Build Docker image for Flask application
         run: docker build -t my-flask-app .
@@ -41,19 +41,10 @@ jobs:
           sleep 5
           done
 
-      - name: Start Flask application
-        run: docker run -d --network host my-flask-app
-
       - name: Run integration tests
-        run: docker run --network host -v ${GITHUB_WORKSPACE}:/app my-flask-app python /app/test_integration.py
+        run: docker run --network host my-flask-app
 
       - name: Cleanup
         run: |
-
-
-      - name: Cleanup
-        run: |
-          docker stop $(docker ps -aq)
-          docker rm $(docker ps -aq)
+          docker rm -f selenium-standalone
           docker rmi my-flask-app
-    
