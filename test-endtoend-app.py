@@ -100,4 +100,5 @@ class TestAppE2E(unittest.TestCase):
 
 # Exécution des tests si exécuté en tant que script principal
 if __name__ == '__main__':
-    unittest.main()
+    app = create_app()
+    app.run(host='0.0.0.0', port=5000)
