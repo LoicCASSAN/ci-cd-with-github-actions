@@ -1,23 +1,21 @@
-FROM python:3.9-slim
+# Dockerfile to build a flask app
 
-# Installer les dépendances nécessaires pour Flask
-RUN apt-get update && \
-    apt-get install -y curl && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+FROM python:3.10.13-bullseye
 
-# Définir le répertoire de travail
+# Set the working directory to /app
+
 WORKDIR /app
 
-# Copier les fichiers de dépendances et installer les dépendances Python
-COPY requirements.txt requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
+# Copy the current directory contents into the container at /app
 
-# Copier le reste des fichiers de l'application
 COPY . .
 
-# Exposer le port sur lequel Flask s'exécute
-EXPOSE 5000
+# Install any needed packages specified in requirements.txt
 
-# Commande pour lancer l'application Flask
-CMD ["python", "app.py"]
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Make port 5000 available to the world outside this container
+
+EXPOSE 5000
+ENV FLASK_APP=app.py
+CMD ["flask", "run", "--host", "0.0.0.0"]
